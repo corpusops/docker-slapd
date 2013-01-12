@@ -10,5 +10,5 @@ perl /nagios-plugins/check_ldap_syncrepl_status.pl \
     -c "$CRITICAL" \
     -D "$SLAPD_ROOT_DN" \
     -P "$SLAPD_ROOT_PASSWORD" \
-    -U "$(echo $SLAPD_SYNCREPL|base64 -d|xargs -n1|egrep ^provider=|sed -re "s/provider=//g")"
+    -U "$(echo $SLAPD_SYNCREPL|base64 -d|xargs -n1|grep -E ^provider=|sed -re "s/provider=//g")"
 # vim:set et sts=4 ts=4 tw=80:
