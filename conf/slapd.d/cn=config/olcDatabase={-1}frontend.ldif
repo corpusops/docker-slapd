@@ -1,0 +1,20 @@
+# AUTO-GENERATED FILE - DO NOT EDIT!! Use ldapmodify.
+# reviewed
+objectClass: olcDatabaseConfig
+objectClass: olcFrontendConfig
+olcDatabase: {-1}frontend
+olcAddContentAcl: FALSE
+olcLastMod: TRUE
+olcMaxDerefDepth: 0
+olcReadOnly: FALSE
+olcSchemaDN: cn=Subschema
+olcSizeLimit: 5000
+olcSyncUseSubentry: FALSE
+olcMonitoring: FALSE
+structuralObjectClass: olcDatabaseConfig
+entryUUID: b2d27176-6a4f-1033-86d6-773bdb858bca
+creatorsName: cn=config
+createTimestamp: 20140507162342Z
+entryCSN: 20140507165431.978200Z#000000#000#000000
+modifiersName: cn=admin,cn=config
+modifyTimestamp: 20140507165431Z

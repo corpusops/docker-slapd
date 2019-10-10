@@ -1,0 +1,26 @@
+
+attributetype ( 1.3.6.1.4.1.3401.8.2.2 NAME ( 'pgpElementType' )
+ DESC 'PGP defined attribute containing the type of the pref object'
+ EQUALITY caseIgnoreMatch
+ SUBSTR caseIgnoreSubstringsMatch
+ SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+ SINGLE-VALUE X-ORIGIN 'Pretty Good Privacy (PGP)' )
+
+attributetype ( 1.3.6.1.4.1.3401.8.2.3 NAME ( 'pgpData' )
+ DESC 'PGP defined attribute containing the admin pref data'
+ SYNTAX 1.3.6.1.4.1.1466.115.121.1.40
+ SINGLE-VALUE X-ORIGIN 'Pretty Good Privacy (PGP)' )
+
+objectclass ( 1.3.6.1.4.1.3401.8.2.4 NAME ( 'pgpProfile' )
+ DESC 'PGP defined objectclass of a collection admin prefs'
+ SUP top
+ STRUCTURAL
+ MUST  objectClass
+ MAY  ( cn $ owner ) X-ORIGIN 'Pretty Good Privacy (PGP)' )
+
+objectclass ( 1.3.6.1.4.1.3401.8.2.1 NAME ( 'pgpElement' )
+ DESC 'PGP defined objectclass of a single admin pref object'
+ SUP top
+ STRUCTURAL
+ MUST  objectClass
+ MAY  ( pgpElementType $ pgpData $ owner ) X-ORIGIN 'Pretty Good Privacy (PGP)' )

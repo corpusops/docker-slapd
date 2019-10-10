@@ -1,0 +1,10 @@
+---
+# APP
+- hosts: "{{slapd_servers|default('all')}}"
+  roles: [corpusops.roles/ansible_plugins]
+  tasks:
+  - when: ["cops_slapd_lifecycle_app|default(true)"]
+    tags: ["cops_slapd_lifecycle_app"]
+    block:
+    - include_role: {name: slapd_vars, public: true, allow_duplicates: false}
+    - include_role: {name: slapd,      public: true, allow_duplicates: false}

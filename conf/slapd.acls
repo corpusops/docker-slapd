@@ -1,0 +1,3 @@
+{{ if ne (.Env.SLAPD_ACLS |default "no") "no" }}
+{{ .Env.SLAPD_ACLS | b64dec }}
+{{ end }}

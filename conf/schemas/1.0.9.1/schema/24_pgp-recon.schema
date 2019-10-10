@@ -1,0 +1,18 @@
+
+attributetype ( 1.3.6.1.4.1.3401.8.2.6 NAME ( 'pgpReconData' )
+ DESC 'PGP defined attributed containing reconstruction data'
+ SYNTAX 1.3.6.1.4.1.1466.115.121.1.40
+ SINGLE-VALUE X-ORIGIN 'Pretty Good Privacy (PGP)' )
+
+attributetype ( 1.3.6.1.4.1.3401.8.2.7 NAME ( 'pgpReconCertID' )
+ DESC 'PGP defined attribute containing the certID of the key'
+ EQUALITY caseIgnoreMatch
+ SUBSTR caseIgnoreSubstringsMatch
+ SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+ SINGLE-VALUE X-ORIGIN 'Pretty Good Privacy (PGP)' )
+
+objectclass ( 1.3.6.1.4.1.3401.8.2.5 NAME ( 'pgpReconElement' )
+ DESC 'PGP defined objectclass of a reconstruction data object'
+ STRUCTURAL
+ MUST  objectClass
+ MAY  ( pgpReconCertID $ pgpReconData $ owner ) X-ORIGIN 'Pretty Good Privacy (PGP)' )

@@ -1,0 +1,73 @@
+---
+- file:
+    state: directory
+    mode: "2751"
+    path: "{{item}}"
+  with_items:
+  - "{{cops_slapd_dir}}"
+  - "{{cops_slapd_cert_dir}}"
+- name: Synchronise files inside the environment (deleguation)
+  delegate_to: "localhost"
+  synchronize:
+    compress: false
+    ssh_args: "{{cops_slapd_sshargs}}"
+    src: "{{cops_slapd_code_dir}}"
+    dest: "{{cops_slapd_dir}}/"
+    rsync_opts: "{{cops_slapd_code_rsync_opts}}"
+    set_remote_user: "no"
+    #update_opts: '--recursive'
+- template:
+    src: "docker.env"
+    dest: "{{cops_slapd_compose_dir}}/docker.env"
+    mode: "0644"
+    trim_blocks: false
+- blockinfile:
+    create: true
+    path: "{{cops_slapd_compose_dir}}/.env"
+    content: |-
+      {{cops_slapd_dotenv}}
+      {{cops_slapd_dotenv_extra}}
+    marker: "# ANSIBLE MANAGED BLOCK :: deploy commit :: {mark}"
+- name: Create directories
+  file:
+    path: "{{cops_slapd_compose_dir}}/{{ item.path }}"
+    state: directory
+    mode: '{{ item.mode }}'
+  with_filetree: "{{playbook_dir}}/../../setup/"
+  when: item.state == 'directory'
+
+- copy:
+    content: "{{item.value}}"
+    dest: "{{cops_slapd_cert_dir}}/{{item.key}}.pem"
+    mode: "0644"
+  with_dict: "{{cops_slapd_cert}}"
+  when: "{{item.value|copsf_asbool}}"
+- name: Template files
+  template:
+    src: '{{ item.src }}'
+    dest: "{{cops_slapd_compose_dir}}/{{ item.path }}"
+    mode: '{{ item.mode }}'
+    trim_blocks: false
+  with_filetree: "{{playbook_dir}}/../../setup/"
+  when: item.state == 'file'
+- include_tasks: docker_login.yml
+  with_items: "{{cops_slapd_registries}}"
+- shell: qsdf
+- shell: |
+    set -ex
+    cd "{{cops_slapd_compose_dir}}"
+    : {{cops_slapd_dc}} build {{cops_slapd_build_args}}
+  when:
+  - "cops_slapd_build|copsf_asbool"
+  - "cops_slapd_build_args|copsf_asbool"
+# ensure all images are (re) pulled
+- shell: |
+    set -ex
+    cd "{{cops_slapd_compose_dir}}"
+    {{cops_slapd_dc}} pull {{cops_slapd_pull_args}}
+  retries: 5
+  delay: 10
+  when:
+  - "cops_slapd_pull|copsf_asbool"
+- include_tasks: service.yml
+  tags: [slapd_service, service]

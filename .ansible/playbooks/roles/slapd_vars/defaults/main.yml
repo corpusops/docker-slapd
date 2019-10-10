@@ -1,0 +1,249 @@
+---
+cops_slapd_name: slapd
+cops_slapd_code_dir: "{{playbook_dir}}/../.."
+cops_slapd_cert_dir: "{{cops_slapd_dir}}/cert"
+cops_slapd_docker_image: "{{cops_slapd_name}}"
+cops_slapd_default_docker_tag: "latest"
+cops_slapd_docker_tag: "{{cops_slapd_default_docker_tag}}"
+cops_slapd_dir: "/srv/docker/{{cops_slapd_name}}"
+cops_slapd_compose_dir: "{{cops_slapd_dir}}"
+cops_slapd_gateway: "{{ ansible_default_ipv4.address}}"
+cops_slapd_image: "corpusops/slapd:{{cops_slapd_docker_tag}}"
+cops_slapd_time_zone: "Europe/Paris"
+cops_slapd_composename: "{{cops_slapd_name}}"
+cops_slapd_build_args: "--no-cache --pull -f docker-compose-build.yml"
+cops_slapd_domain: "{{cops_slapd_deploy_env}}-{{cops_slapd_name}}.{{cops_slapd_tld_domain}}"
+cops_slapd_domains: ["{{cops_slapd_domain}}"]
+# backup could be remove in a-while when we have redeployed it everywhere
+cops_slapd_restarted_services_default: "slapd setup-services"
+cops_slapd_restarted_services: "{{cops_slapd_restarted_services_default}}"
+cops_slapd_purge_volumes: []
+cops_slapd_sshargs: >-
+  {% set k = hostvars[inventory_hostname].get(
+                'ansible_ssh_private_key_file', '') %}
+  {% if k%}-o IdentityFile={{k}} -o IdentitiesOnly=yes{%endif%}
+  {% if (
+      hostvars[inventory_hostname].ansible_connection|default('ssh')
+     ) not in [ 'smart', 'local'] %}
+  {{ hostvars[inventory_hostname].ssh_args | default('') }}
+  {{ hostvars[inventory_hostname].ansible_ssh_args | default('') }}
+  {{ hostvars[inventory_hostname].ansible_ssh_common_args | default('') }}
+  {{ hostvars[inventory_hostname].ansible_ssh_extra_args | default('') }}
+  {% endif %}
+cops_slapd_build: false
+cops_slapd_cert:
+  chain: null
+  cert: null
+  privkey: null
+cops_slapd_pull: true
+cops_slapd_registries: []
+#- {registry: registry.foo.net, username: foo, password: bar}
+cops_slapd_compose_files: [docker-compose.yml, docker-compose-prod.yml]
+cops_slapd_dc:
+  docker-compose {% for i in cops_slapd_compose_files %} -f {{i}}{% endfor %}
+  -p "{{cops_slapd_composename}}"
+cops_slapd_docker_env_freeform: |-
+  {{ cops_slapd_docker_env_defaults}}
+  {{ cops_slapd_docker_env_extra}}
+cops_slapd_docker_env_defaults: |-
+  #
+# very small, perfect for testing purpose
+cops_slapd_pull_args: ""
+cops_slapd_base_dn: "dc=exemple,dc=com"
+cops_slapd_groups_dn: "ou=group,{{cops_slapd_base_dn}}"
+cops_slapd_people_dn: "ou=People,{{cops_slapd_base_dn}}"
+cops_slapd_root_dn: "cn=admin,{{cops_slapd_base_dn}}"
+cops_slapd_root_password: secret12a45e89q3
+cops_slapd_loglevel: "256"
+cops_slapd_tls_verify_client: never
+cops_slapd_schema_version: 1.0.9.1
+cops_slapd_allow_anonymous: false
+cops_slapd_ldap_master_dn: "uid=admin,ou=people,{{cops_slapd_base_dn}}"
+cops_slapd_ldap_master_password: "secret"
+cops_slapd_ldap_master: "ldap://localhost:389"
+cops_slapd_syncrepl: ""
+# cops_slapd_syncrepl: "{{cops_slapd_syncrepl_default}}"
+cops_slapd_syncrepl_id: "001"
+cops_slapd_syncrepl_interval: "00:00:04:00"
+cops_slapd_syncrepl_retry: "5 5 5 +"
+cops_slapd_syncrepl_scope: "sub"
+cops_slapd_syncrepl_extra: "sizelimit=unlimited starttls=yes timeout=3 tls_reqcert=allow type=refreshAndPersist"
+cops_slapd_syncrepl_default: >-
+  syncrepl
+  rid={{cops_slapd_syncrepl_id}}
+  binddn="{{cops_slapd_ldap_master_dn}}"
+  credentials="{{cops_slapd_ldap_master_password}}"
+  interval="{{cops_slapd_syncrepl_interval}}"
+  provider="{{cops_slapd_ldap_master}}"
+  retry="{{cops_slapd_syncrepl_retry}}"
+  scope="{{cops_slapd_syncrepl_scope}}"
+  searchbase="{{cops_slapd_base_dn}}"
+  {{cops_slapd_syncrepl_extra}}
+cops_slapd_groups_acls: >-
+  by group.exact="cn=ldap-reader,{{cops_slapd_groups_dn}}" read
+  by group.exact="cn=ldap-writer,{{cops_slapd_groups_dn}}" write
+  by group.exact="cn=ldapreader,{{cops_slapd_groups_dn}}" read
+  by group.exact="cn=ldapwriter,{{cops_slapd_groups_dn}}" write
+cops_slapd_acls: "{{cops_slapd_acls_default}}"
+cops_slapd_acls_default: |-
+  {%- set acls = [] %}
+  {%- if not cops_slapd_allow_anonymous %}
+  {%-   for acl in cops_slapd_acls_base %}
+  {%-     if 'by anonymous' in acls %}
+  {%-       for i in ['read', 'write'] %}
+  {%-         set _ = acls.append(acl.replace('by anonymous {0}'.format(i), 'by anonymous auth')) %}
+  {%-       endfor %}
+  {%-     elif 'by *' in acl and 'anonymous' not in acl %}
+  {%-       set _ = acls.append(acl.replace('by *', 'by anonymous auth by *')) %}
+  {%-     else %}
+  {%-       set _ = acls.append(acl) %}
+  {%-     endif %}
+  {%-   endfor %}
+  {%- endif %}
+  {% for acl in acls %}
+  {{acl}}
+  {% endfor %}
+cops_slapd_acls_base:
+- |-
+ access to attrs=userPassword
+    by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage
+    by dn.base="cn=admin,{{cops_slapd_base_dn}}" write
+    by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
+    {{cops_slapd_groups_acls}}
+    by dn.base="cn=ldapwriter,ou=virtual,{{cops_slapd_people_dn}}" read
+    by dn.base="cn=replicator,ou=virtual,{{cops_slapd_people_dn}}" read
+    by dn.base="cn=ldapreader,ou=virtual,{{cops_slapd_people_dn}}" read
+    by self write
+    by anonymous {% if cops_slapd_allow_anonymous %}read{% else %}auth{% endif %}
+    by * none
+- |-
+  access to attrs=uid,cn,sn,homeDirectory,uidNumber,gidNumber,memberUid,loginShell,employeeType
+    {{cops_slapd_groups_acls}}
+    by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage
+    by dn.base="cn=admin,{{cops_slapd_base_dn}}" write
+    by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
+    by dn.base="cn=ldapwriter,ou=virtual,{{cops_slapd_people_dn}}" read
+    by anonymous {% if cops_slapd_allow_anonymous %}read{% else %}auth{% endif %}
+    by * read
+- |-
+  access to attrs=description,telephoneNumber,roomNumber,gecos,cn,sn,givenname,jpegPhoto
+    {{cops_slapd_groups_acls}}
+    by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage
+    by dn.base="cn=admin,{{cops_slapd_base_dn}}" write
+    by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
+    by dn.base="cn=ldapwriter,ou=virtual,{{cops_slapd_people_dn}}" write
+    by self write
+    by anonymous {% if cops_slapd_allow_anonymous %}read{% else %}auth{% endif %}
+    by * read
+- |-
+  access to attrs=homePhone,mobile
+    {{cops_slapd_groups_acls}}
+    by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage
+    by dn.base="cn=admin,{{cops_slapd_base_dn}}" write
+    by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
+    by dn.base="cn=ldapwriter,ou=virtual,{{cops_slapd_people_dn}}" write
+    by self write
+    by anonymous {% if cops_slapd_allow_anonymous %}read{% else %}auth{% endif %}
+    by * none
+- |-
+  access to dn.regex="(uid=.*,)?ou=People,{{cops_slapd_base_dn}}"
+    {{cops_slapd_groups_acls}}
+    by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage
+    by dn.base="cn=admin,{{cops_slapd_base_dn}}" write
+    by dn.base="uid=fd-admin,ou=people,dc={{cops_slapd_base_dn}}" write
+    by dn.base="cn=ldapwriter,ou=virtual,{{cops_slapd_people_dn}}" write
+    by self write
+    by anonymous {% if cops_slapd_allow_anonymous %}read{% else %}auth{% endif %}
+    by * read
+- |-
+  access to dn.subtree="ou=group,{{cops_slapd_base_dn}}"
+    {{cops_slapd_groups_acls}}
+    by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage
+    by dn.base="cn=admin,dc={{cops_slapd_base_dn}}" write
+    by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
+    {% if not cops_slapd_allow_anonymous %}
+    by anonymous auth
+    {% endif %}
+    by * read
+- |-
+  access to dn.subtree="{{cops_slapd_people_dn}}"
+    by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage
+    by dn.base="cn=admin,{{cops_slapd_base_dn}}" write
+    {{cops_slapd_groups_acls}}
+    by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
+    by dn.base="cn=ldapwriter,ou=virtual,{{cops_slapd_people_dn}}" write
+    by self write
+    {% if not cops_slapd_allow_anonymous %}
+    by anonymous auth
+    {% endif %}
+    by * read
+- |-
+  access to dn.subtree="ou=contact,{{cops_slapd_base_dn}}"
+    {{cops_slapd_groups_acls}}
+    by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage
+    by dn.base="cn=admin,{{cops_slapd_base_dn}}" write
+    by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
+    by dn.base="cn=ldapwriter,ou=virtual,{{cops_slapd_people_dn}}" write
+    by dn.one="{{cops_slapd_people_dn}}" read
+    by anonymous none
+    by * none
+- |-
+  access to dn.base="{{cops_slapd_base_dn}}"
+    {% if not cops_slapd_allow_anonymous %}
+    by anonymous auth
+    {% endif %}
+    by * read
+- |-
+  access to *
+    {{cops_slapd_groups_acls}}
+    by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage
+    by dn.base="cn=admin,{{cops_slapd_base_dn}}" write
+    by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
+    by dn.base="cn=replicator,ou=virtual,{{cops_slapd_people_dn}}" read
+    {% if not cops_slapd_allow_anonymous %}
+    by anonymous auth
+    {% endif %}
+    by * read
+cops_slapd_dotenv: |-
+  APP_TYPE=slapd
+  SLAPD_TLS_VERIFY_CLIENT={{cops_slapd_tls_verify_client}}
+  {% if cops_slapd_acls%}
+  SLAPD_ACLS={{(cops_slapd_acls|b64encode).replace('\n', '')}}
+  {%endif%}
+  {%if cops_slapd_syncrepl%}
+  SLAPD_SYNCREPL={{(cops_slapd_syncrepl|b64encode).replace('\n', '')}}
+  {%endif %}
+  SLAPD_LOGLEVEL={{cops_slapd_loglevel}}
+  SLAPD_DOMAINS={{cops_slapd_domains|join('-|_')}}
+  SLAPD_GATEWAY={{cops_slapd_gateway}}
+  SLAPD_ROOT_PASSWORD={{cops_slapd_root_password}}
+  SLAPD_BASE_DN={{cops_slapd_base_dn}}
+  SLAPD_ROOT_DN={{cops_slapd_root_dn}}
+  COMPOSE_PROJECT_NAME={{cops_slapd_composename}}
+  CONTROL_COMPOSE_FILES={{cops_slapd_compose_files|join(' ')}}
+  SLAPD_NAME={{ cops_slapd_name }}
+  SLAPD_IMAGE={{ cops_slapd_docker_image }}
+  SLAPD_IMAGE_VERSION={{cops_slapd_docker_tag}}
+  SLAPD_SCHEMA_VERSION={{cops_slapd_schema_version}}
+  TIME_ZONE={{cops_slapd_time_zone}}
+  TIMEZONE={{cops_slapd_time_zone}}
+  TZ={{cops_slapd_time_zone}}
+  SLAPD_LISTEN_IP={{cops_slapd_listen_ip}}
+  SLAPD_LDAP_PORT={{cops_slapd_ldap_port}}
+  SLAPD_LDAPS_PORT={{cops_slapd_ldaps_port}}
+cops_slapd_listen_ip: "127.0.0.1"
+cops_slapd_ldap_port: "389"
+cops_slapd_ldaps_port: "636"
+cops_slapd_dotenv_extra: ""
+# free form for params inside dockerenv
+cops_slapd_docker_env_extra: ""
+# Normally playbook is in ./.ansible/playbooks
+cops_slapd_group: slapd_servers
+cops_slapd_code_rsync_opts: [
+    "-azv",
+    # include deploy projects base code
+    "--include", "local/*-deploy",
+    "--exclude", ".ansible",
+    "--exclude", "local/*",
+    "--exclude", ".env",
+    "--exclude", "docker.env"]

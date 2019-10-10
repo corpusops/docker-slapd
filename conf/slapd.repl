@@ -1,0 +1,3 @@
+{{ if ne (.Env.SLAPD_SYNCREPL |default "no") "no" }}
+{{ .Env.SLAPD_SYNCREPL | b64dec }}
+{{ end }}
