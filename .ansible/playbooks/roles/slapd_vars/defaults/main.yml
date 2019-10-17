@@ -222,7 +222,8 @@ cops_slapd_dotenv: |-
   COMPOSE_PROJECT_NAME={{cops_slapd_composename}}
   CONTROL_COMPOSE_FILES={{cops_slapd_compose_files|join(' ')}}
   SLAPD_NAME={{ cops_slapd_name }}
-  SLAPD_IMAGE={{ cops_slapd_docker_image }}
+  SLAPD_IMAGE={{ cops_slapd_image }}
+  SLAPD_CERTS_DIR={{cops_slapd_cert_dir}}
   SLAPD_IMAGE_VERSION={{cops_slapd_docker_tag}}
   SLAPD_SCHEMA_VERSION={{cops_slapd_schema_version}}
   TIME_ZONE={{cops_slapd_time_zone}}

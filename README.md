@@ -11,10 +11,7 @@
       the default template dumps `SLAPD_ACLS` environment variable<br/>
       which should be a oneline BASE64 encoded string
     - `./conf/slapd.d/*` (not finished)
+- see [.env.dist](./env.dist) to start a configuration
 - Those variables need to be encoded to base64 without newlines (a one line (`\n` removed)):
-  - `SLAPD_SYNCREPL`
-  - `SLAPD_ACLS`
-
-## After init
-* Run this kind of ldif to apply syncrepl
-
+  - `SLAPD_SYNCREPL`: syncrepl configuration lines to add (bare slapd.conf configuration lines)
+  - `SLAPD_ACLS`: acl configuration lines to add (bare slapd.conf configuration lines)

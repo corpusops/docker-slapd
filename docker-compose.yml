@@ -5,7 +5,7 @@ x-images:
     environment: {"COMPOSE_PROJECT_NAME": "$COMPOSE_PROJECT_NAME"}
   slapd: &slapd
     volumes:
-    - "{{cops_slapd_cert_dir}}:/cert:ro"
+    - "${SLAPD_CERTS_DIR}:/cert:ro"
     - slapd-data:/var/lib/ldap
     - slapd-run:/var/run/slapd
     - ./conf:/slapdconf:ro
@@ -13,7 +13,7 @@ x-images:
 services:
   slapd:
     <<: [ *env, *slapd ]
-    image: "{{cops_slapd_image}}"
+    image: "$SLAPD_IMAGE"
     ports:
     - "${SLAPD_LISTEN_IP:-127.0.0.1}:${SLAPD_LDAP_PORT:-389}:389"
     - "${SLAPD_LISTEN_IP:-127.0.0.1}:${SLAPD_LDAPS_PORT:-636}:636"
