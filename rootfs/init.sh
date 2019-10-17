@@ -16,6 +16,7 @@ SLAPD_CERTS_DIR=${SLAPD_CERTS_DIR:-/certs}
 HAS_FILE_SLAPD_CONF=${HAS_FILE_SLAPD_CONF-}
 HAS_FILE_SLAPD_REPL=${HAS_FILE_SLAPD_REPL-}
 HAS_FILE_SLAPD_ACLS=${HAS_FILE_SLAPD_ACLS-}
+SUPERVISORD_CONFIGS="${SUPERVISORD_CONFIGS:-"/etc/supervisor.d/cron /etc/supervisor.d/rsyslog /slapdconf/supervisor"}"
 
 test_conf_files_presence() {
     local t="" k=""
@@ -30,14 +31,15 @@ test_conf_files_presence() {
 init() {
     if [[ -z "${SLAPD_INIT}" ]];then return;fi
     if [ ! -e /var/run/slapd ];then mkdir -p /var/run/slapd;fi
-    if [ -e /conf/schemas/$SLAPD_SCHEMA_VERSION/ldif ];then
+    frep /slapdconf/rebootcron:/etc/cron.d/rebootcron --overwrite
+    if [ -e /slapdconf/schemas/$SLAPD_SCHEMA_VERSION/ldif ];then
         rsync -av --delete \
-            "/conf/schemas/$SLAPD_SCHEMA_VERSION/ldif/" \
+            "/slapdconf/schemas/$SLAPD_SCHEMA_VERSION/ldif/" \
             "/etc/ldap/slapd.d/cn=config/cn=schema/"
     fi
-    if [ -e /conf/schemas/$SLAPD_SCHEMA_VERSION/schema ];then
+    if [ -e /slapdconf/schemas/$SLAPD_SCHEMA_VERSION/schema ];then
         rsync -av --delete \
-            "/conf/schemas/$SLAPD_SCHEMA_VERSION/schema/" \
+            "/slapdconf/schemas/$SLAPD_SCHEMA_VERSION/schema/" \
             /etc/ldap/schema/
     fi
     if [[ -z "$SLAPD_SCHEMAS" ]] ;then
@@ -52,9 +54,9 @@ init() {
         d="/etc/ldap/$f"
         dd="$(dirname $d)"
         if [ ! -e "$dd" ];then mkdir -p "$dd";fi
-        vv frep /conf/$f:$d --overwrite
+        vv frep /slapdconf/$f:$d --overwrite
         test_conf_files_presence
-    done < <( cd /conf \
+    done < <( cd /slapdconf \
         && for i in slapd.acls slapd.repl slapd.conf;do \
             if [ -e $i ];then echo $i;fi; \
         done \
@@ -90,7 +92,7 @@ init() {
         DEFAULT_SLAPD_SERVICES="$DEFAULT_SLAPD_SERVICES ldaps:///"
     fi
     SLAPD_SERVICES="${SLAPD_SERVICES:-$DEFAULT_SLAPD_SERVICES}"
-    DEFAULT_SLAPD_ARGS="-g openldap -u openldap"
+    DEFAULT_SLAPD_ARGS="-g openldap -u openldap -d ${SLAPD_LOG_LEVEL-256}"
     if [[ -n $HAS_FILE_SLAPD_CONF ]];then
         DEFAULT_SLAPD_ARGS="$DEFAULT_SLAPD_ARGS -f /etc/ldap/slapd.conf"
     else
@@ -98,7 +100,8 @@ init() {
     fi
     SLAPD_ARGS="${SLAPD_ARGS:-$DEFAULT_SLAPD_ARGS}"
     export SLAPD_SCHEMAS
-    export SLAPD_HAS_SSL SLAPD_SERVICES SLAPD_ARGS
+    export SLAPD_HAS_SSL SLAPD_SERVICES SLAPD_ARGS SLAPD_EXTRA_ARGS
+    export SUPERVISORD_CONFIGS SLAPD_SERVICES
     if [ -e /etc/ldap/slapd.conf ];then
         echo "Using slapd.conf" >&2
         sed -re "s/rootpw .*/rootpw xxx/g" /etc/ldap/slapd.conf >&2
@@ -120,7 +123,6 @@ init
 if [[ -n "$@" ]];then
     exec $@
 else
-    set -- exec /usr/sbin/slapd $SLAPD_ARGS $SLAPD_EXTRA_ARGS -h "$SLAPD_SERVICES"
-    "$@"
+    exec /bin/supervisord.sh
 fi
-# vim:set et sts=4 ts=4 tw=80: 
+# vim:set et sts=4 ts=4 tw=80:

@@ -2,3 +2,22 @@ version: '3.7'
 services:
   slapd:
     restart: unless-stopped
+  backup:
+    restart: unless-stopped
+    env_file: [.env, docker.env]
+    image: "corpusops/dbsmartbackup:slapd-latest"
+    entrypoint: /init.sh
+    command: dbs-entry.sh
+    volumes:
+    - ./conf:/slapdconf:ro
+    - ./rootfs/init.sh:/init.sh
+    - slapd-data:/var/lib/ldap
+    - slapd-run:/var/run/slapd
+    - backupdb-dumps:/var/db_smart_backup/
+    - backupdb-logs:/var/db_smart_backup/logs/
+    restart: unless-stopped
+    environment:
+    - "SLAPD_REBOOT_CRON=#"
+volumes:
+  backupdb-dumps:
+  backupdb-logs:

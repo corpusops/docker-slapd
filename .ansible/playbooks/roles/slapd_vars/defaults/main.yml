@@ -15,7 +15,7 @@ cops_slapd_build_args: "--no-cache --pull -f docker-compose-build.yml"
 cops_slapd_domain: "{{cops_slapd_deploy_env}}-{{cops_slapd_name}}.{{cops_slapd_tld_domain}}"
 cops_slapd_domains: ["{{cops_slapd_domain}}"]
 # backup could be remove in a-while when we have redeployed it everywhere
-cops_slapd_restarted_services_default: "slapd setup-services"
+cops_slapd_restarted_services_default: "slapd backup"
 cops_slapd_restarted_services: "{{cops_slapd_restarted_services_default}}"
 cops_slapd_purge_volumes: []
 cops_slapd_sshargs: >-
@@ -231,6 +231,8 @@ cops_slapd_dotenv: |-
   SLAPD_LISTEN_IP={{cops_slapd_listen_ip}}
   SLAPD_LDAP_PORT={{cops_slapd_ldap_port}}
   SLAPD_LDAPS_PORT={{cops_slapd_ldaps_port}}
+  SLAPD_REBOOT_CRON={{cops_slapd_reboot_cron}}
+cops_slapd_reboot_cron: "3 1 * * *"
 cops_slapd_listen_ip: "127.0.0.1"
 cops_slapd_ldap_port: "389"
 cops_slapd_ldaps_port: "636"

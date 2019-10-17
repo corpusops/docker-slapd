@@ -1,0 +1,17 @@
+[program:slapd]
+command=/usr/sbin/slapd {{.Env.SLAPD_ARGS}} {{.Env.SLAPD_EXTRA_ARGS}} -h "{{.Env.SLAPD_SERVICES}}"
+autostart = true
+startretries = 3
+startsecs = 1
+stopwaitsecs = 1
+autorestart = true
+killasgroup = true
+stopasgroup = true
+stopsignal = KILL
+startretries = 5
+stdout_logfile = /dev/stdout
+stderr_logfile = /dev/stderr
+stdout_logfile_maxbytes = 0
+stderr_logfile_maxbytes = 0
+stdout_logfile_backups = 0
+stderr_logfile_backups = 0

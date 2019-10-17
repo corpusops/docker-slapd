@@ -1,6 +1,6 @@
 # ansible+docker based slapd setup
 
-## The /conf dir
+## The /conf (/slapdconf inside container) dir
 - `./conf` is a special directory where well name files are injected inside the slapd configuration upon container boot. All the files inside are processed with [frep](https://github.com/subchen/frep) to react, adapt, and replace some parameters inside with environement values
     - `./conf/slapd.conf` (default) is a special directory where well name files are injected inside the slapd configuration upon container boot
     - `./conf/schema/*` schema to use

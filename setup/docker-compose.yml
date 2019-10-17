@@ -8,15 +8,15 @@ x-images:
     - "{{cops_slapd_cert_dir}}:/cert:ro"
     - slapd-data:/var/lib/ldap
     - slapd-run:/var/run/slapd
-    - ./conf:/conf:ro
+    - ./conf:/slapdconf:ro
     - ./rootfs/init.sh:/init.sh
 services:
   slapd:
     <<: [ *env, *slapd ]
     image: "{{cops_slapd_image}}"
     ports:
-    - "${SLAPD_LISTEN_IP:-127.0.0.1}:${SLAPD_LDAP_PORT:-389}"
-    - "${SLAPD_LISTEN_IP:-127.0.0.1}:${SLAPD_LDAPS_PORT:-636}"
+    - "${SLAPD_LISTEN_IP:-127.0.0.1}:${SLAPD_LDAP_PORT:-389}:389"
+    - "${SLAPD_LISTEN_IP:-127.0.0.1}:${SLAPD_LDAPS_PORT:-636}:636"
 volumes:
   slapd-data: {name: "${COMPOSE_PROJECT_NAME}-slapd-data", external: false}
   slapd-run: {name: "${COMPOSE_PROJECT_NAME}-slapd-run", external: false}

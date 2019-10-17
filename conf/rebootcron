@@ -1,0 +1,1 @@
+{{.Env.SLAPD_REBOOT_CRON | default "0 0 * * *"}} root /bin/sh -c "/bin/supervisord-go -c /etc/supervisord-go/supervisord.conf ctl stop slapd && /bin/supervisord-go -c /etc/supervisord-go/supervisord.conf ctl start slapd"

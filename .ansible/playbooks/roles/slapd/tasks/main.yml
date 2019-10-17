@@ -52,7 +52,7 @@
   when: item.state == 'file'
 - include_tasks: docker_login.yml
   with_items: "{{cops_slapd_registries}}"
-- shell: qsdf
+#- shell: qsdf
 - shell: |
     set -ex
     cd "{{cops_slapd_compose_dir}}"
