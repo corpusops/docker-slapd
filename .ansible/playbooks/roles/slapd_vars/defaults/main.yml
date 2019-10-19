@@ -11,6 +11,7 @@ cops_slapd_gateway: "{{ ansible_default_ipv4.address}}"
 cops_slapd_image: "corpusops/slapd:{{cops_slapd_docker_tag}}"
 cops_slapd_time_zone: "Europe/Paris"
 cops_slapd_composename: "{{cops_slapd_name}}"
+cops_slapd_servicename: "docker-{{cops_slapd_name}}"
 cops_slapd_build_args: "--no-cache --pull -f docker-compose-build.yml"
 cops_slapd_domain: "{{cops_slapd_deploy_env}}-{{cops_slapd_name}}.{{cops_slapd_tld_domain}}"
 cops_slapd_domains: ["{{cops_slapd_domain}}"]

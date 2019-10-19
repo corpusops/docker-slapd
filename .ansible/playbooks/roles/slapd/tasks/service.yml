@@ -4,6 +4,7 @@
       working_directory: "{{cops_slapd_compose_dir}}"
       files: "{{cops_slapd_compose_files}}"
       project: "{{cops_slapd_composename}}"
+      name: "{{cops_slapd_servicename}}"
       restart: "on-failure"
       pull: false
   tags: [service]
