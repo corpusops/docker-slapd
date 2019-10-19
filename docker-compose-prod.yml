@@ -5,9 +5,9 @@ services:
   backup:
     restart: unless-stopped
     env_file: [.env, docker.env]
-    image: "$SLAPD_IMAGE"
+    image: "corpusops/dbsmartbackup:slapd-latest"
     entrypoint: /init.sh
-    command: "corpusops/dbsmartbackup:slapd-latest"
+    command: "dbs-entry.sh"
     volumes:
     - ./conf:/slapdconf:ro
     - ./rootfs/init.sh:/init.sh
