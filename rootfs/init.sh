@@ -69,7 +69,7 @@ init() {
     for i in cert privkey chain;do
         for j in \
             "/etc/slapd.d/cn=config.ldif" \
-            /etc/lapd/slapd.conf \
+            /etc/ldap/slapd.conf \
             ; do
         if [ -e "$j" ] && [ ! -e "$SLAPD_CERTS_DIR/${i}.pem" ];then
             sed -i -e "/${SLAPD_CERTS_DIR//\//\\/}\/${i}.pem/d" "$j"
@@ -78,7 +78,7 @@ init() {
     done
 
     for j in \
-            /etc/lapd/slapd.conf \
+            /etc/ldap/slapd.conf \
             "/etc/slapd.d/cn=config.ldif" \
         ; do
         if ( grep -q .pem  "$j" );then
