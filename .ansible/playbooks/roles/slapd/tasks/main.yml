@@ -56,7 +56,7 @@
 - shell: |
     set -ex
     cd "{{cops_slapd_compose_dir}}"
-    : {{cops_slapd_dc}} build {{cops_slapd_build_args}}
+    {{cops_slapd_dc}} {{cops_slapd_build_args}}
   when:
   - "cops_slapd_build|copsf_asbool"
   - "cops_slapd_build_args|copsf_asbool"

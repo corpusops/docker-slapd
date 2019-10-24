@@ -12,7 +12,7 @@ cops_slapd_image: "corpusops/slapd:{{cops_slapd_docker_tag}}"
 cops_slapd_time_zone: "Europe/Paris"
 cops_slapd_composename: "{{cops_slapd_name}}"
 cops_slapd_servicename: "docker-{{cops_slapd_name}}"
-cops_slapd_build_args: "--no-cache --pull -f docker-compose-build.yml"
+cops_slapd_build_args: "-f docker-compose-build.yml build --no-cache --pull"
 cops_slapd_domain: "{{cops_slapd_deploy_env}}-{{cops_slapd_name}}.{{cops_slapd_tld_domain}}"
 cops_slapd_domains: ["{{cops_slapd_domain}}"]
 # backup could be remove in a-while when we have redeployed it everywhere
@@ -31,7 +31,7 @@ cops_slapd_sshargs: >-
   {{ hostvars[inventory_hostname].ansible_ssh_common_args | default('') }}
   {{ hostvars[inventory_hostname].ansible_ssh_extra_args | default('') }}
   {% endif %}
-cops_slapd_build: false
+cops_slapd_build: true
 cops_slapd_cert:
   chain: null
   cert: null
