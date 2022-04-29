@@ -1,4 +1,5 @@
-FçROM corpusops/ubuntu:20.04
+ARG BASE=corpusops/ubuntu:20.04
+FROM $BASE
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -qq
 RUN set -x \
