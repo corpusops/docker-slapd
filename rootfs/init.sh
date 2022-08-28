@@ -7,6 +7,7 @@ join_by() { local IFS="$1"; shift; echo "$*"; }
 log() { echo "$@" >&2; }
 vv() { log "$@"; "$@"; }
 
+NO_LOG="${NO_LOG-}"
 SLAPD_EXTRA_ARGS="${SLAPD_EXTRA_ARGS-}"
 SLAPD_INIT="${SLAPD_INIT-1}"
 SLAPD_FIXPERMS="${SLAPD_FIXPERMS-1}"
@@ -102,7 +103,7 @@ init() {
     export SLAPD_SCHEMAS
     export SLAPD_HAS_SSL SLAPD_SERVICES SLAPD_ARGS SLAPD_EXTRA_ARGS
     export SUPERVISORD_CONFIGS SLAPD_SERVICES
-    if [ -e /etc/ldap/slapd.conf ];then
+    if [[ -z $NO_LOG ]] && [ -e /etc/ldap/slapd.conf ];then
         echo "Using slapd.conf" >&2
         sed -re "s/rootpw .*/rootpw xxx/g" /etc/ldap/slapd.conf >&2
         echo "########################" >&2
