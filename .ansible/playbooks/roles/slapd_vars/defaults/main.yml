@@ -222,6 +222,7 @@ cops_slapd_dotenv: |-
   SLAPD_ROOT_DN={{cops_slapd_root_dn}}
   COMPOSE_PROJECT_NAME={{cops_slapd_composename}}
   CONTROL_COMPOSE_FILES={{cops_slapd_compose_files|join(' ')}}
+  COMPOSE_FILE={{cops_slapd_compose_files|join(':')}}
   SLAPD_NAME={{ cops_slapd_name }}
   SLAPD_IMAGE={{ cops_slapd_image }}
   SLAPD_CERTS_DIR={{cops_slapd_cert_dir}}
