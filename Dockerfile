@@ -7,6 +7,7 @@ RUN set -x \
     ldap-utils \
     ca-certificates \
     slapd \
+    monitoring-plugins \
     python3-ldap \
     libdate-manip-perl libgetopt-complete-perl libnet-ldap-perl \
     && mkdir -p /etc/ldap /var/run/slapd/  /var/lib/ldap/ \
