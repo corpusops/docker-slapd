@@ -31,7 +31,6 @@ test_conf_files_presence() {
 
 init() {
     if [[ -z "${SLAPD_INIT}" ]];then return;fi
-    if [ ! -e /var/run/slapd ];then mkdir -p /var/run/slapd;fi
     frep /slapdconf/rebootcron:/etc/cron.d/rebootcron --overwrite
     if [ -e /slapdconf/schemas/$SLAPD_SCHEMA_VERSION/ldif ];then
         rsync -av --delete \
@@ -108,18 +107,22 @@ init() {
         sed -re "s/rootpw .*/rootpw xxx/g" /etc/ldap/slapd.conf >&2
         echo "########################" >&2
     fi
-    fixperms
 }
 
 fixperms() {
     if [[ -z "${SLAPD_FIXPERMS}" ]];then return;fi
-    chown -Rf openldap \
+    local g=""
+    for i in /var/run/slapd /var/lib/ldap;do if [ ! -e "$i" ];then mkdir -p "$i";fi;done
+    if (getent group openldap >/dev/null 2>&1);then g=":openldap";fi
+    chown -Rf "openldap$g" \
         /etc/ldap/slapd* \
         /var/lib/ldap \
         /var/run/slapd
 }
 
+fixperms
 init
+fixperms
 
 if [[ -n "$@" ]];then
     exec $@
