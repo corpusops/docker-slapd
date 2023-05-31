@@ -24,7 +24,7 @@ test_conf_files_presence() {
     for t in slapd.conf slapd.acls slapd.repl;do
         k=${t//./_}
         k=${k^^}
-        if [ -e /etc/ldap/$i ];then eval "HAS_FILE_$k=1";fi
+        if [ -e /etc/ldap/$t ];then eval "HAS_FILE_$k=1";fi
     done
     export HAS_FILE_SLAPD_ACLS HAS_FILE_SLAPD_REPL HAS_FILE_SLAPD_CONF
 }
@@ -92,7 +92,7 @@ init() {
         DEFAULT_SLAPD_SERVICES="$DEFAULT_SLAPD_SERVICES ldaps:///"
     fi
     SLAPD_SERVICES="${SLAPD_SERVICES:-$DEFAULT_SLAPD_SERVICES}"
-    DEFAULT_SLAPD_ARGS="-g openldap -u openldap -d ${SLAPD_LOG_LEVEL-256}"
+    DEFAULT_SLAPD_ARGS="-g openldap -u openldap -d ${SLAPD_LOGLEVEL-256}"
     if [[ -n $HAS_FILE_SLAPD_CONF ]];then
         DEFAULT_SLAPD_ARGS="$DEFAULT_SLAPD_ARGS -f /etc/ldap/slapd.conf"
     else
