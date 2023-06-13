@@ -31,7 +31,7 @@ cops_slapd_sshargs: >-
   {{ hostvars[inventory_hostname].ansible_ssh_common_args | default('') }}
   {{ hostvars[inventory_hostname].ansible_ssh_extra_args | default('') }}
   {% endif %}
-cops_slapd_build: true
+cops_slapd_build: false
 cops_slapd_cert:
   chain: null
   cert: null
