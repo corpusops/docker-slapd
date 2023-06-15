@@ -235,10 +235,6 @@ cops_slapd_dotenv: |-
   SLAPD_LDAP_PORT={{cops_slapd_ldap_port}}
   SLAPD_LDAPS_PORT={{cops_slapd_ldaps_port}}
   SLAPD_REBOOT_CRON={{cops_slapd_reboot_cron}}
-  {% if cops_slapd_via_file %}
-  HAS_FILE_SLAPD_CONF=1
-  {% endif %}
-cops_slapd_via_file: true
 cops_slapd_reboot_cron: "3 1 * * *"
 cops_slapd_listen_ip: "127.0.0.1"
 cops_slapd_ldap_port: "389"
