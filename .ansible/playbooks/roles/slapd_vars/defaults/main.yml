@@ -115,7 +115,7 @@ cops_slapd_acls_base:
     by dn.base="cn=replicator,ou=virtual,{{cops_slapd_people_dn}}" read
     by dn.base="cn=ldapreader,ou=virtual,{{cops_slapd_people_dn}}" read
     by self write
-    by anonymous {% if cops_slapd_allow_anonymous %}read{% else %}auth{% endif %}
+    by anonymous {{cops_slapd_allow_anonymous_acl}}
     by * none
 - |-
   access to attrs=uid,cn,sn,homeDirectory,uidNumber,gidNumber,memberUid,loginShell,employeeType
@@ -124,7 +124,7 @@ cops_slapd_acls_base:
     by dn.base="cn=admin,{{cops_slapd_base_dn}}" write
     by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
     by dn.base="cn=ldapwriter,ou=virtual,{{cops_slapd_people_dn}}" read
-    by anonymous {% if cops_slapd_allow_anonymous %}read{% else %}auth{% endif %}
+    by anonymous {{cops_slapd_allow_anonymous_acl}}
     by * read
 - |-
   access to attrs=description,telephoneNumber,roomNumber,gecos,cn,sn,givenname,jpegPhoto
@@ -134,7 +134,7 @@ cops_slapd_acls_base:
     by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
     by dn.base="cn=ldapwriter,ou=virtual,{{cops_slapd_people_dn}}" write
     by self write
-    by anonymous {% if cops_slapd_allow_anonymous %}read{% else %}auth{% endif %}
+    by anonymous {{cops_slapd_allow_anonymous_acl}}
     by * read
 - |-
   access to attrs=homePhone,mobile
@@ -144,7 +144,7 @@ cops_slapd_acls_base:
     by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
     by dn.base="cn=ldapwriter,ou=virtual,{{cops_slapd_people_dn}}" write
     by self write
-    by anonymous {% if cops_slapd_allow_anonymous %}read{% else %}auth{% endif %}
+    by anonymous {{cops_slapd_allow_anonymous_acl}}
     by * none
 - |-
   access to dn.regex="(uid=.*,)?ou=People,{{cops_slapd_base_dn}}"
@@ -154,7 +154,7 @@ cops_slapd_acls_base:
     by dn.base="uid=fd-admin,ou=people,dc={{cops_slapd_base_dn}}" write
     by dn.base="cn=ldapwriter,ou=virtual,{{cops_slapd_people_dn}}" write
     by self write
-    by anonymous {% if cops_slapd_allow_anonymous %}read{% else %}auth{% endif %}
+    by anonymous {{cops_slapd_allow_anonymous_acl}}
     by * read
 - |-
   access to dn.subtree="ou=group,{{cops_slapd_base_dn}}"
@@ -162,9 +162,7 @@ cops_slapd_acls_base:
     by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage
     by dn.base="cn=admin,dc={{cops_slapd_base_dn}}" write
     by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
-    {% if not cops_slapd_allow_anonymous %}
-    by anonymous auth
-    {% endif %}
+    by anonymous {{cops_slapd_allow_anonymous_acl}}
     by * read
 - |-
   access to dn.subtree="{{cops_slapd_people_dn}}"
@@ -174,9 +172,7 @@ cops_slapd_acls_base:
     by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
     by dn.base="cn=ldapwriter,ou=virtual,{{cops_slapd_people_dn}}" write
     by self write
-    {% if not cops_slapd_allow_anonymous %}
-    by anonymous auth
-    {% endif %}
+    by anonymous {{cops_slapd_allow_anonymous_acl}}
     by * read
 - |-
   access to dn.subtree="ou=contact,{{cops_slapd_base_dn}}"
@@ -190,9 +186,7 @@ cops_slapd_acls_base:
     by * none
 - |-
   access to dn.base="{{cops_slapd_base_dn}}"
-    {% if not cops_slapd_allow_anonymous %}
-    by anonymous auth
-    {% endif %}
+    by anonymous {{cops_slapd_allow_anonymous_acl}}
     by * read
 - |-
   access to *
@@ -201,10 +195,9 @@ cops_slapd_acls_base:
     by dn.base="cn=admin,{{cops_slapd_base_dn}}" write
     by dn.base="uid=fd-admin,{{cops_slapd_people_dn}}" write
     by dn.base="cn=replicator,ou=virtual,{{cops_slapd_people_dn}}" read
-    {% if not cops_slapd_allow_anonymous %}
-    by anonymous auth
-    {% endif %}
+    by anonymous {{cops_slapd_allow_anonymous_acl}}
     by * read
+cops_slapd_allow_anonymous_acl: "{{ cops_slapd_allow_anonymous and 'read' or 'auth' }}"
 cops_slapd_dotenv: |-
   APP_TYPE=slapd
   SLAPD_TLS_VERIFY_CLIENT={{cops_slapd_tls_verify_client}}
