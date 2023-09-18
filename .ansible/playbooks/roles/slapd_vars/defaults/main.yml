@@ -86,9 +86,10 @@ cops_slapd_groups_acls: >-
   by group.exact="cn=ldapreader,{{cops_slapd_groups_dn}}" read
   by group.exact="cn=ldapwriter,{{cops_slapd_groups_dn}}" write
 cops_slapd_acls: "{{cops_slapd_acls_default}}"
+cops_slapd_no_acls: false
 cops_slapd_acls_default: |-
   {%- set acls = [] %}
-  {%- if not cops_slapd_allow_anonymous %}
+  {%- if not cops_slapd_no_acls %}
   {%-   for acl in cops_slapd_acls_base %}
   {%-     if 'by anonymous' in acls %}
   {%-       for i in ['read', 'write'] %}
@@ -115,7 +116,7 @@ cops_slapd_acls_base:
     by dn.base="cn=replicator,ou=virtual,{{cops_slapd_people_dn}}" read
     by dn.base="cn=ldapreader,ou=virtual,{{cops_slapd_people_dn}}" read
     by self write
-    by anonymous {{cops_slapd_allow_anonymous_acl}}
+    by anonymous {{cops_slapd_allow_anonymous_password_acl}}
     by * none
 - |-
   access to attrs=uid,cn,sn,homeDirectory,uidNumber,gidNumber,memberUid,loginShell,employeeType
@@ -197,6 +198,8 @@ cops_slapd_acls_base:
     by dn.base="cn=replicator,ou=virtual,{{cops_slapd_people_dn}}" read
     by anonymous {{cops_slapd_allow_anonymous_acl}}
     by * read
+cops_slapd_allow_anonymouspasswordaccess: false
+cops_slapd_allow_anonymous_password_acl: "{{ cops_slapd_allow_anonymouspasswordaccess  and 'read' or 'auth' }}"
 cops_slapd_allow_anonymous_acl: "{{ cops_slapd_allow_anonymous and 'read' or 'auth' }}"
 cops_slapd_dotenv: |-
   APP_TYPE=slapd
