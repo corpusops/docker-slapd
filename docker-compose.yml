@@ -5,7 +5,7 @@ x-images:
     environment: {"COMPOSE_PROJECT_NAME": "$COMPOSE_PROJECT_NAME"}
   slapd: &slapd
     volumes:
-    - "${SLAPD_CERTS_DIR}:/cert:ro"
+    - "${SLAPD_CERTS_DIR:-./cert}:/cert:ro"
     - slapd-data:/var/lib/ldap
     - slapd-run:/var/run/slapd
     - ./conf:/slapdconf:ro

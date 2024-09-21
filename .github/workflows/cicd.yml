@@ -32,19 +32,19 @@ jobs:
              IMGV=${IMG_RELEASE};
              BASE=${IMG_RELEASE//latest/$IMG_LATEST};
              t=${IMG}:${IMGV};
-             db() { docker build
-              --build-arg BASE="corpusops/ubuntu:$BASE" --build-arg BUILDKIT_INLINE_CACHE="1" -t ${3} -f ${1} ${2} "${@:4}"; };
-             db ${DFILE} ${DPATH} ${t}-no-squash;docker tag ${t}-no-squash ${t};
-             if [ "x${NO_SQUASH}" = "x" ];then db ${DFILE} ${DPATH} ${t} --squash;fi;
-             if [ "x${{steps.v.outputs.releasable}}" = "xtrue" ];then for i in "" -no-squash;do docker push ${t}${i};done;fi;
+             db() { docker build --build-arg BASE="corpusops/ubuntu-bare:$BASE" --build-arg BUILDKIT_INLINE_CACHE="1" -t ${3} -f ${1} ${2} "${@:4}"; };
+             db ${DFILE} ${DPATH} ${t};docker tag ${t} ${IMG}:latest;
+             if [ "${IMG_RELEASE}" = "${IMG_LATEST}" ];then echo "Also release latest">&2; t="${t} ${IMG}:latest";fi;
+             if [ "x${{steps.v.outputs.releasable}}" = "xtrue" ];then echo "Releasing $t" >&2;for i in ${t};do docker push ${i};done;fi;
     strategy:
       max-parallel: 5
       fail-fast: false
       matrix:
         IMG_RELEASE:
-        - latest
         - 18.04
         - 20.04
+        - 22.04
+        - 24.04
         IMG_LATEST: [20.04]
         IMG: ["corpusops/slapd"]
         DFILE: ["Dockerfile"]
