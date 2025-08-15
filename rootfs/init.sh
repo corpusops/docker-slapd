@@ -6,6 +6,10 @@ if [[ -n $SLAPD_SDEBUG ]];then set -x;fi
 join_by() { local IFS="$1"; shift; echo "$*"; }
 log() { echo "$@" >&2; }
 vv() { log "$@"; "$@"; }
+version_lte() { [  "$1" = "$(printf "$1\n$2" | sort -V | head -n1)" ]; }
+version_lt() { [ "$1" = "$2" ] && return 1 || version_lte $1 $2; }
+version_gte() { [  "$2" = "$(printf "$1\n$2" | sort -V | head -n1)" ]; }
+version_gt() { [ "$1" = "$2" ] && return 1 || version_gte $1 $2; }
 
 NO_LOG="${NO_LOG-}"
 SLAPD_EXTRA_ARGS="${SLAPD_EXTRA_ARGS-}"
@@ -18,6 +22,8 @@ HAS_FILE_SLAPD_CONF=${HAS_FILE_SLAPD_CONF-}
 HAS_FILE_SLAPD_REPL=${HAS_FILE_SLAPD_REPL-}
 HAS_FILE_SLAPD_ACLS=${HAS_FILE_SLAPD_ACLS-}
 SUPERVISORD_CONFIGS="${SUPERVISORD_CONFIGS:-"/etc/supervisor.d/cron /etc/supervisor.d/rsyslog /slapdconf/supervisor"}"
+
+export SLAPD_VERSION=${SLAPD_VERSION:-$(dpkg-query --showformat='${Version}' --show slapd|sed -re "s/\+.*//g")}
 
 test_conf_files_presence() {
     local t="" k=""
@@ -43,7 +49,7 @@ init() {
             /etc/ldap/schema/
     fi
     if [[ -z "$SLAPD_SCHEMAS" ]] ;then
-        schemas=$(find /etc/ldap/schema -type f 2>/dev/null | sort -V)
+        schemas=$(find /etc/ldap/schema -type f 2>/dev/null -name "*.schema" | grep -v README | sort -V)
         if [[ -n "$schemas" ]];then
             SLAPD_SCHEMAS="$(join_by "|" $schemas)"
         fi

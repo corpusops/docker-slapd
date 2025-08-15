@@ -15,3 +15,10 @@
 - Those variables need to be encoded to base64 without newlines (a one line (`\n` removed)):
   - `SLAPD_SYNCREPL`: syncrepl configuration lines to add (bare slapd.conf configuration lines)
   - `SLAPD_ACLS`: acl configuration lines to add (bare slapd.conf configuration lines)
+
+## test in dev
+```bash
+./create_ca_cert.sh
+COMPOSE_FILE="docker-compose.yml:docker-compose-build.yml" docker-compose build
+COMPOSE_FILE="docker-compose.yml:docker-compose-build.yml" docker-compose up
+```

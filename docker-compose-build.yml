@@ -1,4 +1,7 @@
 version: '3.7'
 services:
   slapd:
-    build: {context: "."}
+    build:
+      context: "."
+      args:
+        BASE: "${BASE-corpusops/ubuntu-bare:20.04}"
